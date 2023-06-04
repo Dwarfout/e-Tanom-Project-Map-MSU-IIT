@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>e-Tanom Project Map: Tinago</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/TRIALSITES_eTanomdata1120_2.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:17
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 17,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        map.createPane('pane_GoogleHybrid_1');
+        map.getPane('pane_GoogleHybrid_1').style.zIndex = 401;
+        var layer_GoogleHybrid_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleHybrid_1',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 17,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleHybrid_1;
+        map.addLayer(layer_GoogleHybrid_1);
+        function pop_TRIALSITES_eTanomdata1120_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Site</th>\
+                        <td>' + (feature.properties['Site'] !== null ? autolinker.link(feature.properties['Site'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Latitude</th>\
+                        <td>' + (feature.properties['Latitude'] !== null ? autolinker.link(feature.properties['Latitude'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Longitude</th>\
+                        <td>' + (feature.properties['Longitude'] !== null ? autolinker.link(feature.properties['Longitude'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Length (m)</th>\
+                        <td>' + (feature.properties['Length (m)'] !== null ? autolinker.link(feature.properties['Length (m)'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Width (m)</th>\
+                        <td>' + (feature.properties['Width (m)'] !== null ? autolinker.link(feature.properties['Width (m)'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Age</th>\
+                        <td>' + (feature.properties['Age'] !== null ? autolinker.link(feature.properties['Age'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">IUCN Status</th>\
+                        <td>' + (feature.properties['IUCN Status'] !== null ? autolinker.link(feature.properties['IUCN Status'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Category</th>\
+                        <td>' + (feature.properties['Category'] !== null ? autolinker.link(feature.properties['Category'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_TRIALSITES_eTanomdata1120_2_0() {
+            return {
+                pane: 'pane_TRIALSITES_eTanomdata1120_2',
+                radius: 4.8,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,255,99,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_TRIALSITES_eTanomdata1120_2');
+        map.getPane('pane_TRIALSITES_eTanomdata1120_2').style.zIndex = 402;
+        map.getPane('pane_TRIALSITES_eTanomdata1120_2').style['mix-blend-mode'] = 'normal';
+        var layer_TRIALSITES_eTanomdata1120_2 = new L.geoJson(json_TRIALSITES_eTanomdata1120_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TRIALSITES_eTanomdata1120_2',
+            layerName: 'layer_TRIALSITES_eTanomdata1120_2',
+            pane: 'pane_TRIALSITES_eTanomdata1120_2',
+            onEachFeature: pop_TRIALSITES_eTanomdata1120_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_TRIALSITES_eTanomdata1120_2_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_TRIALSITES_eTanomdata1120_2);
+        map.addLayer(layer_TRIALSITES_eTanomdata1120_2);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>e-Tanom Project Map: Tinago</h2>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomright'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'This is a webmap of the 10 Tagged flora around the vicinity OF MSU-IIT Tibanga, Iligan City through the MSU - IIT, CSM Deans Office , and CSM - EC community extension program entitled: e-Tanom (2023)';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/TRIALSITES_eTanomdata1120_2.png" /> TRIAL SITES_e-Tanom.data.11-20': layer_TRIALSITES_eTanomdata1120_2,"Google Hybrid": layer_GoogleHybrid_1,"OSM Standard": layer_OSMStandard_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_TRIALSITES_eTanomdata1120_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Site'] !== null?String('<div style="color: #ffffff; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Site']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_TRIALSITES_eTanomdata1120_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Length (m)": "real","Width (m)": "real","Age": "real","Category": "str","IUCN Status": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+        var i = 0;
+        layer_TRIALSITES_eTanomdata1120_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Site'] !== null?String('<div style="color: #ffffff; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Site']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_TRIALSITES_eTanomdata1120_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Lengthm = document.createElement("div");
+            div_Lengthm.id = "div_Lengthm";
+            div_Lengthm.className = "slider";
+            document.getElementById("menu").appendChild(div_Lengthm);
+            var lab_Lengthm = document.createElement('div');
+            lab_Lengthm.innerHTML  = 'Length (m): <span id="val_Lengthm"></span>';
+            lab_Lengthm.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Lengthm);
+            var reset_Lengthm = document.createElement('div');
+            reset_Lengthm.innerHTML = 'clear filter';
+            reset_Lengthm.className = 'filterlabel';
+            lab_Lengthm.className = 'filterlabel';
+            reset_Lengthm.onclick = function() {
+                sel_Lengthm.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Lengthm);
+            var sel_Lengthm = document.getElementById('div_Lengthm');
+            noUiSlider.create(sel_Lengthm, {
+                connect: true,
+                start: [10.88, 70.61],
+                range: {
+                min: 10.88,
+                max: 70.61
+                }
+            });
+            sel_Lengthm.noUiSlider.on('update', function (values) {
+            val_Lengthm = document.getElementById('val_Lengthm');
+            val_Lengthm.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Widthm = document.createElement("div");
+            div_Widthm.id = "div_Widthm";
+            div_Widthm.className = "slider";
+            document.getElementById("menu").appendChild(div_Widthm);
+            var lab_Widthm = document.createElement('div');
+            lab_Widthm.innerHTML  = 'Width (m): <span id="val_Widthm"></span>';
+            lab_Widthm.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Widthm);
+            var reset_Widthm = document.createElement('div');
+            reset_Widthm.innerHTML = 'clear filter';
+            reset_Widthm.className = 'filterlabel';
+            lab_Widthm.className = 'filterlabel';
+            reset_Widthm.onclick = function() {
+                sel_Widthm.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Widthm);
+            var sel_Widthm = document.getElementById('div_Widthm');
+            noUiSlider.create(sel_Widthm, {
+                connect: true,
+                start: [2.43, 6.75],
+                range: {
+                min: 2.43,
+                max: 6.75
+                }
+            });
+            sel_Widthm.noUiSlider.on('update', function (values) {
+            val_Widthm = document.getElementById('val_Widthm');
+            val_Widthm.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Age = document.createElement("div");
+            div_Age.id = "div_Age";
+            div_Age.className = "slider";
+            document.getElementById("menu").appendChild(div_Age);
+            var lab_Age = document.createElement('div');
+            lab_Age.innerHTML  = 'Age: <span id="val_Age"></span>';
+            lab_Age.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Age);
+            var reset_Age = document.createElement('div');
+            reset_Age.innerHTML = 'clear filter';
+            reset_Age.className = 'filterlabel';
+            lab_Age.className = 'filterlabel';
+            reset_Age.onclick = function() {
+                sel_Age.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Age);
+            var sel_Age = document.getElementById('div_Age');
+            noUiSlider.create(sel_Age, {
+                connect: true,
+                start: [2.01, 12.0],
+                range: {
+                min: 2.01,
+                max: 12.0
+                }
+            });
+            sel_Age.noUiSlider.on('update', function (values) {
+            val_Age = document.getElementById('val_Age');
+            val_Age.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Category = document.createElement('div');
+            div_Category.id = "div_Category";
+            div_Category.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Category);
+            sel_Category = document.createElement('select');
+            sel_Category.multiple = true;
+            sel_Category.size = 1;
+            sel_Category.id = "sel_Category";
+            var Category_options_str = "<option value='' unselected></option>";
+            sel_Category.onchange = function(){filterFunc()};
+            Category_options_str  += '<option value="TREE">TREE</option>';
+            sel_Category.innerHTML = Category_options_str;
+            div_Category.appendChild(sel_Category);
+            var lab_Category = document.createElement('div');
+            lab_Category.innerHTML = 'Category';
+            lab_Category.className = 'filterlabel';
+            div_Category.appendChild(lab_Category);
+            var reset_Category = document.createElement('div');
+            reset_Category.innerHTML = 'clear filter';
+            reset_Category.className = 'filterlabel';
+            reset_Category.onclick = function() {
+                var options = document.getElementById("sel_Category").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Category.appendChild(reset_Category);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_IUCNStatus = document.createElement('div');
+            div_IUCNStatus.id = "div_IUCNStatus";
+            div_IUCNStatus.className= "filterselect";
+            document.getElementById("menu").appendChild(div_IUCNStatus);
+            sel_IUCNStatus = document.createElement('select');
+            sel_IUCNStatus.multiple = true;
+            sel_IUCNStatus.size = 4;
+            sel_IUCNStatus.id = "sel_IUCNStatus";
+            var IUCNStatus_options_str = "<option value='' unselected></option>";
+            sel_IUCNStatus.onchange = function(){filterFunc()};
+            IUCNStatus_options_str  += '<option value="LC">LC</option>';
+            IUCNStatus_options_str  += '<option value="NE">NE</option>';
+            IUCNStatus_options_str  += '<option value="NT">NT</option>';
+            IUCNStatus_options_str  += '<option value="V">V</option>';
+            sel_IUCNStatus.innerHTML = IUCNStatus_options_str;
+            div_IUCNStatus.appendChild(sel_IUCNStatus);
+            var lab_IUCNStatus = document.createElement('div');
+            lab_IUCNStatus.innerHTML = 'IUCN Status';
+            lab_IUCNStatus.className = 'filterlabel';
+            div_IUCNStatus.appendChild(lab_IUCNStatus);
+            var reset_IUCNStatus = document.createElement('div');
+            reset_IUCNStatus.innerHTML = 'clear filter';
+            reset_IUCNStatus.className = 'filterlabel';
+            reset_IUCNStatus.onclick = function() {
+                var options = document.getElementById("sel_IUCNStatus").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_IUCNStatus.appendChild(reset_IUCNStatus);
+        resetLabels([layer_TRIALSITES_eTanomdata1120_2]);
+        map.on("zoomend", function(){
+            resetLabels([layer_TRIALSITES_eTanomdata1120_2]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_TRIALSITES_eTanomdata1120_2]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_TRIALSITES_eTanomdata1120_2]);
+        });
+        </script>
+    </body>
+</html>
